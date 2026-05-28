@@ -1,30 +1,45 @@
 from fastapi import FastAPI, HTTPException
-from model.cliente import ClienteBase, ClienteCrear, Cliente, ClienteEditar
-from model.factura import Factura, CrearFactura, EditarFactura, Factura
-from model.transacciones import TransaccionCrear, TransaccionEditar ,Transaccion
+
+from model.cliente import (
+    Cliente,
+    ClienteCrear,
+    ClienteEditar
+)
+
+from model.factura import (
+    Factura,
+    CrearFactura,
+    EditarFactura
+)
+
+from model.transacciones import (
+    Transaccion,
+    TransaccionCrear,
+    TransaccionEditar
+)
 
 app = FastAPI()
 
-# =========================
-# LISTAS SIMULANDO BD
-# =========================
+# ===================================
+# LISTAS SIMULANDO BASE DE DATOS
+# ===================================
 
 listar_clientes: list[Cliente] = []
 listas_facturas: list[Factura] = []
-lista_transacciones = list[Transaccion] = []
+lista_transacciones: list[Transaccion] = []
 
 
-# ======================================================
+# ===================================
 # CRUD CLIENTES
-# ======================================================
+# ===================================
 
 @app.get("/clientes")
 async def listar_cliente():
 
     if len(listar_clientes) == 0:
-        return {"Clientes": "No se han registrado usuarios aun"}
+        return {"mensaje": "No hay clientes registrados"}
 
-    return {"Clientes": listar_clientes}
+    return listar_clientes
 
 
 @app.get("/clientes/{id}")
@@ -35,7 +50,7 @@ async def listar_cliente_id(id: int):
         if cliente.id == id:
             return cliente
 
-    return {"Clientes": "No se encuentra"}
+    return {"error": "Cliente no encontrado"}
 
 
 @app.post("/clientes", response_model=Cliente)
@@ -53,11 +68,14 @@ async def crear_cliente(datos_cliente: ClienteCrear):
 
 
 @app.put("/clientes/{id}")
-async def editar_cliente(id: int, datos_cliente: ClienteEditar):
+async def editar_cliente(
+    id: int,
+    datos_cliente: ClienteEditar
+):
 
-    for i, obj_cliente in enumerate(listar_clientes):
+    for i, cliente in enumerate(listar_clientes):
 
-        if obj_cliente.id == id:
+        if cliente.id == id:
 
             cliente_val = Cliente.model_validate(
                 datos_cliente.model_dump()
@@ -68,53 +86,82 @@ async def editar_cliente(id: int, datos_cliente: ClienteEditar):
             listar_clientes[i] = cliente_val
 
             return {
-                "Mensaje": "Se actualizo satisfactoriamente.",
-                "Cliente": cliente_val
-            }
-
-    return {"Error": "Cliente no encontrado"}
-
-
-@app.delete("/clientes/{id}")
-async def eliminar_cliente(id: int):
-
-    for i, object_cli in enumerate(listar_clientes):
-
-        if object_cli.id == id:
-
-            nombre_cliente = object_cli.nombre
-
-            del listar_clientes[i]
-
-            return {
-                "message": f"Cliente {nombre_cliente} eliminado exitosamente"
+                "mensaje": "Cliente actualizado",
+                "cliente": cliente_val
             }
 
     return {"error": "Cliente no encontrado"}
 
 
-# ======================================================
-# CRUD FACTURAS
-# ======================================================
+@app.delete("/clientes/{id}")
+async def eliminar_cliente(id: int):
 
-@app.get("/facturas", response_model= list[Factura])
+    for i, cliente in enumerate(listar_clientes):
+
+        if cliente.id == id:
+
+            nombre = cliente.nombre
+
+            del listar_clientes[i]
+
+            return {
+                "mensaje": f"Cliente {nombre} eliminado"
+            }
+
+    return {"error": "Cliente no encontrado"}
+
+
+# ===================================
+# CRUD FACTURAS
+# ===================================
+
+@app.get("/facturas", response_model=list[Factura])
 async def listar_facturas():
+
     return listas_facturas
 
-@app.post("/facturas/{cliente_id}", response_model=Factura)
-async def crear_facturas(cliente_id: int, datos_factura: CrearFactura):
+
+@app.get("/facturas/{id}")
+async def obtener_factura(id: int):
+
+    for factura in listas_facturas:
+
+        if factura.id == id:
+            return factura
+
+    return {"error": "Factura no encontrada"}
+
+
+@app.post("/facturas/{cliente_id}")
+async def crear_factura(
+    cliente_id: int,
+    datos_factura: CrearFactura
+):
+
     cliente_encontrado = None
-    for c in listar_clientes:
-        if c.id == cliente_id:
-            cliente_encontrado = c
+
+    for cliente in listar_clientes:
+
+        if cliente.id == cliente_id:
+            cliente_encontrado = cliente
             break
-        
+
     if not cliente_encontrado:
-        raise HTTPException(status_code=400, detail=f"Cliente con id {cliente_id} no existe, debes crear.")
-    
-    factura_val= Factura.model_validate(datos_factura.model_dump())
+
+        raise HTTPException(
+            status_code=404,
+            detail="Cliente no encontrado"
+        )
+
+    factura_val = Factura.model_validate(
+        datos_factura.model_dump()
+    )
+
     factura_val.id = len(listas_facturas) + 1
     factura_val.cliente = cliente_encontrado
+
     listas_facturas.append(factura_val)
+
     return factura_val
- 
+
+

@@ -5,14 +5,16 @@ class TransaccionBase(BaseModel):
     cantidad: int
     vr_unitario: float
     descripcion: str
-    
-class TransaccionCrear(BaseModel):
+
+
+class TransaccionCrear(TransaccionBase):
     pass
-    
-class TransaccionEditar(BaseModel):
+
+
+class TransaccionEditar(TransaccionBase):
     pass
+
 
 class Transaccion(TransaccionBase):
     id: int | None = None
     factura_id: int | None = None
-    
