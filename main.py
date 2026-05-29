@@ -268,3 +268,50 @@ async def crear_transaccion(
     }
 
 
+@app.put("/transacciones/{id}")
+async def editar_transaccion(
+    id: int,
+    datos_transaccion: TransaccionEditar
+):
+
+    for i, transaccion in enumerate(
+        lista_transacciones
+    ):
+
+        if transaccion.id == id:
+
+            transaccion_val = Transaccion.model_validate(
+                datos_transaccion.model_dump()
+            )
+
+            transaccion_val.id = id
+            transaccion_val.factura_id = (
+                transaccion.factura_id
+            )
+
+            lista_transacciones[i] = transaccion_val
+
+            return {
+                "mensaje": "Transacción actualizada",
+                "transaccion": transaccion_val
+            }
+
+    return {"error": "Transacción no encontrada"}
+
+
+@app.delete("/transacciones/{id}")
+async def eliminar_transaccion(id: int):
+
+    for i, transaccion in enumerate(
+        lista_transacciones
+    ):
+
+        if transaccion.id == id:
+
+            del lista_transacciones[i]
+
+            return {
+                "mensaje": "Transacción eliminada"
+            }
+
+    return {"error": "Transacción no encontrada"}
