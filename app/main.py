@@ -1,18 +1,18 @@
 from fastapi import FastAPI, HTTPException
 
-from model.cliente import (
+from app.model.cliente import (
     Cliente,
     ClienteCrear,
     ClienteEditar
 )
 
-from model.factura import (
+from app.model.factura import (
     Factura,
     CrearFactura,
     EditarFactura
 )
 
-from model.transacciones import (
+from app.model.transacciones import (
     Transaccion,
     TransaccionCrear,
     TransaccionEditar
