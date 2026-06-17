@@ -175,7 +175,7 @@ uvicorn main:app --reload
 http://127.0.0.1:8000/docs
 
 ---
-
+el profe es una vpta perrra
 ## Conclusión
 
 Durante el desarrollo de esta actividad se aplicaron conceptos relacionados con APIs REST, FastAPI, validación de datos con Pydantic y operaciones CRUD. Además, se fortalecieron habilidades en la organización del código, manejo de rutas y validación de información dentro de una aplicación backend.
