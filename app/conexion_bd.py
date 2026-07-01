@@ -1,22 +1,22 @@
-from sqlmodel import SQLModel, Session, create_engine
+from sqlmodel import Session, SQLModel, create_engine
 from typing import Annotated
-from fastapi import Depends
+from fastapi import FastAPI, Depends
 
-# nombre de la base datos
-nombre_bd = "bd_clientes_3407186.sqlite3"
-
-# conexion a la bd, con una URL (direccion)
+nombre_bd = "bd_clientes.sqlite3"
 url_bd = f"sqlite:///{nombre_bd}"
 
 # motor de base de datos
-motor_db = create_engine(url_bd)
+motor_bd = create_engine(url_bd)
 
+# Definir el metodo para crear las tablas
+def crear_tablas(app: FastAPI):
+    SQLModel.metadata.create_all(motor_bd)
+    yield #no hay nada para retornar o ejecutar
 
-# obtener sesion en la bd sqlite
+# Definir el metodo para la sesión
 def obtener_sesion():
-    with Session(motor_db) as mi_sesion:
-        yield mi_sesion
+    # CAMBIADO: 'motor' por 'motor_bd'
+    with Session(motor_bd) as session:
+        yield session
 
-
-# Definir la dependencia, y esto registra mi sesion
-Sesion_dependencia = Annotated(Session, Depends(obtener_sesion))
+Sesion_dependencia = Annotated[Session, Depends(obtener_sesion)]
